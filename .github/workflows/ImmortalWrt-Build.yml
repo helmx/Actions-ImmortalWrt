@@ -1,0 +1,108 @@
+#CI项目
+name: ImmortalWrt-Build
+
+#CI计划
+on:
+  #自动编译：当Auto-Clean运行完成后
+  workflow_run:
+    workflows: ["Auto-Clean"]
+    types:
+      - completed
+  #手动编译
+  workflow_dispatch:
+    inputs:
+      PACKAGE:
+        description: '手动调整插件包，仅限一个。'
+        required: false
+        type: string
+      TEST:
+        description: '仅输出配置文件，不编译固件。'
+        default: 'false'
+        required: false
+        type: string
+
+#CI权限
+permissions: write-all
+
+#CI任务
+jobs:
+  config:
+    name: ${{ matrix.TARGET.type }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - TARGET: x86_64 
+            REPO: immortalwrt/immortalwrt
+            BRANCH: master
+            ARCH: amd64
+          - TARGET: rockchip 
+            REPO: immortalwrt/immortalwrt
+            BRANCH: master
+            ARCH: arm64
+          - TARGET: qualcommax 
+            SUBTARGET: ipq807x
+            REPO: VIKINGYFY/immortalwrt
+            BRANCH: main
+            WIFI: 'true'
+          - TARGET: qualcommax 
+            SUBTARGET: ipq807x
+            REPO: VIKINGYFY/immortalwrt
+            BRANCH: main
+            WIFI: 'false'
+          - TARGET: qualcommax 
+            SUBTARGET: ipq60xx
+            REPO: VIKINGYFY/immortalwrt
+            BRANCH: main
+            WIFI: 'true'
+          - TARGET: qualcommax 
+            SUBTARGET: ipq60xx
+            REPO: VIKINGYFY/immortalwrt
+            BRANCH: main
+            WIFI: 'false'
+          - TARGET: mediatek
+            SUBTARGET: mt7981
+            REPO: hanwckf/immortalwrt-mt798x
+            BRANCH: openwrt-21.02
+          - TARGET: mediatek
+            SUBTARGET: mt7986
+            REPO: hanwckf/immortalwrt-mt798x
+            BRANCH: openwrt-21.02
+          - TARGET: mediatek
+            SUBTARGET: mt7981
+            REPO: padavanonly/immortalwrt-mt798x
+            BRANCH: openwrt-21.02
+          - TARGET: mediatek
+            SUBTARGET: mt7986
+            REPO: padavanonly/immortalwrt-mt798x
+            BRANCH: openwrt-21.02
+    
+    #调用公用编译核心WRT-CORE.yml
+    uses: ./.github/workflows/WRT-CORE.yml
+    with:
+      #默认主机名
+      WRT_NAME: Lunar
+      #默认WIFI名称
+      WRT_SSID: ImmortalWrt
+      #默认WIFI密码
+      WRT_WORD: immortalwrt
+      #默认地址
+      WRT_IP: 192.168.6.1
+      #默认主题
+      WRT_THEME: argon
+      #固件平台(需与Config文件夹内文件名一致)
+      WRT_TARGET: ${{matrix.TARGET}}
+      #固件子平台
+      WRT_SUBTARGET: ${{matrix.SUBTARGET || 'generic'}}
+      #固件源码
+      WRT_REPO: ${{matrix.REPO}}
+      #源码分支
+      WRT_BRANCH: ${{matrix.BRANCH}}
+      #固件架构（用于预置插件内核下载）
+      WRT_ARCH: ${{ matrix.ARCH || 'unknown' }}
+      #WIFI驱动
+      WRT_WIFI: ${{ matrix.WIFI || 'unknown' }}
+      #插件调整
+      WRT_PACKAGE: ${{inputs.PACKAGE}}
+      #仅输出配置文件
+      WRT_TEST: ${{inputs.TEST}}
