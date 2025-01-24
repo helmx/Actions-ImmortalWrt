@@ -7,19 +7,32 @@ on:
   workflow_dispatch:
     inputs:
       TARGET:
-        default: 'MEDIATEK'
+        default: 'rockchip'
         required: true
         type: choice
-        options: [MEDIATEK, ROCKCHIP, X86, IPQ60XX-WIFI-YES, IPQ60XX-WIFI-NO, IPQ807X-WIFI-YES, IPQ807X-WIFI-NO, TEST]
-      SOURCE:
-        default: 'VIKINGYFY/immortalwrt'
+        options: [x86_64, rockchip, qualcommax, mediatek]
+      SUBTARGET:
+        default: 'generic'
         required: true
         type: choice
-        options: [VIKINGYFY/immortalwrt, immortalwrt/immortalwrt, LiBwrt/openwrt-6.x, qosmio/openwrt-ipq]
+        options: [ipq60xx, ipq807x, mt7981, mt7986,generic]
+      REPO:
+        default: 'immortalwrt/immortalwrt'
+        required: true
+        type: choice
+        options: 
+            - 'immortalwrt/immortalwrt'
+            - 'VIKINGYFY/immortalwrt'
+            - 'hanwckf/immortalwrt-mt798x'
+            - 'padavanonly/immortalwrt-mt798x'
       BRANCH:
-        default: 'main'
+        default: 'master'
         required: true
-        type: string
+        type: choice
+        options: 
+            - 'master'
+            - 'main'
+            - 'openwrt-21.02'
       PACKAGE:
         required: false
         type: string
@@ -27,7 +40,7 @@ on:
         description: '仅输出配置文件，不编译固件。'
         default: 'true'
         required: true
-        type: boolean
+        type: string
 
 #CI权限
 permissions: write-all
@@ -41,24 +54,24 @@ jobs:
     with:
       #编译平台
       WRT_TARGET: ${{inputs.TARGET}}
+      #固件子平台
+      WRT_SUBTARGET: ${{inputs.SUBTARGET}}
+       #固件架构（用于预置插件内核下载）
+      WRT_ARCH: 'unknown'
       #默认主题
       WRT_THEME: argon
       #默认主机名
-      WRT_NAME: OWRT
+      WRT_NAME: ImmortalWrt
       #默认WIFI名称
-      WRT_SSID: OWRT
+      WRT_SSID: ImmortalWrt
       #默认WIFI密码
-      WRT_WORD: 12345678
+      WRT_WORD: immortalwrt
       #默认地址
-      WRT_IP: 192.168.10.1
-      #默认密码，仅作提示，修改无用
-      WRT_PW: 无
-      #源码链接
-      WRT_REPO: https://github.com/${{inputs.SOURCE}}.git
-      #源码分支
+      WRT_IP: 192.168.6.1
+      #源码
+      WRT_REPO: ${{inputs.REPO}}
+      #分支
       WRT_BRANCH: ${{inputs.BRANCH}}
-      #源码名称
-      WRT_SOURCE: ${{inputs.SOURCE}}
       #插件调整
       WRT_PACKAGE: ${{inputs.PACKAGE}}
       #仅输出配置文件

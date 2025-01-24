@@ -1,24 +1,20 @@
-# OpenWRT-CI
-云编译OpenWRT固件
+# Actions-ImmortalWrt
+云编译ImmortalWrt固件
 
-官方版：
-https://github.com/immortalwrt/immortalwrt.git
-
-高通版：
-https://github.com/VIKINGYFY/immortalwrt.git
+基于V佬云编译脚本
+- https://github.com/VIKINGYFY/OpenWRT-CI
+- https://github.com/VIKINGYFY/CloseWRT-CI
 
 # 固件简要说明：
 
-固件每天早上4点自动编译。
+每天 早上 7 点（07:00）自动编译
 
-固件信息里的时间为编译开始的时间，方便核对上游源码提交时间。
+X86系列、ROCKCHIP系列、MEDIATEK系列、QUALCOMMAX系列、
 
-MEDIATEK系列、QUALCOMMAX系列、ROCKCHIP系列、X86系列。
+x86_64、rockchip源码: https://github.com/immortalwrt/immortalwrt.git
 
-# 目录简要说明：
+mediatek（mt7986、mt7981）源码:
+- hanwckf: https://github.com/hanwckf/immortalwrt-mt798x.git
+- 237: https://github.com/padavanonly/immortalwrt-mt798x.git
 
-workflows——自定义CI配置
-
-Scripts——自定义脚本
-
-Config——自定义配置
+qualcommax（ipq807x、ipq60xx）源码: https://github.com/VIKINGYFY/immortalwrt

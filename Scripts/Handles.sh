@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PKG_PATH="$GITHUB_WORKSPACE/wrt/package/"
+PKG_PATH="$GITHUB_WORKSPACE/wrt/package"
 
 #预置HomeProxy数据
 if [ -d *"homeproxy"* ]; then
@@ -20,16 +20,6 @@ if [ -d *"homeproxy"* ]; then
 	cd .. && rm -rf ./$HP_RULE/
 
 	cd $PKG_PATH && echo "homeproxy date has been updated!"
-fi
-
-#修改argon主题字体和颜色
-if [ -d *"luci-theme-argon"* ]; then
-	cd ./luci-theme-argon/
-
-	sed -i '/font-weight:/ {/!important/! s/\(font-weight:\s*\)[^;]*;/\1normal;/}' $(find ./luci-theme-argon -type f -iname "*.css")
-	sed -i "s/primary '.*'/primary '#31a1a1'/; s/'0.2'/'0.5'/; s/'none'/'bing'/" ./luci-app-argon-config/root/etc/config/argon
-
-	cd $PKG_PATH && echo "theme-argon has been fixed!"
 fi
 
 #移除Shadowsocks组件
@@ -57,4 +47,26 @@ if [ -f "$TS_FILE" ]; then
 	sed -i '/\/files/d' $TS_FILE
 
 	cd $PKG_PATH && echo "tailscale has been fixed!"
+fi
+
+#argon登录页面美化
+ARGON_IMG_FILE="$PKG_PATH/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg"
+if [ -f "$ARGON_IMG_FILE" ]; then
+	# 替换Argon主题内建壁纸
+	cp -f $GITHUB_WORKSPACE/Images/bg1.jpg "$ARGON_IMG_FILE"
+
+	cd $PKG_PATH && echo "argon wallpaper has been replaced!"
+fi
+ARGON_CONFIG_FILE="$PKG_PATH/luci-app-advancedplus/root/etc/config/argon"
+if [ -f "$ARGON_CONFIG_FILE" ]; then
+	# 设置Argon主题的登录页面壁纸为内建
+	sed -i "s/option online_wallpaper 'bing'/option online_wallpaper 'none'/" $ARGON_CONFIG_FILE
+	# 设置Argon主题的登录表单模糊度
+	sed -i "s/option blur '[0-9]*'/option blur '0'/" $ARGON_CONFIG_FILE
+	sed -i "s/option blur_dark '[0-9]*'/option blur_dark '0'/" $ARGON_CONFIG_FILE
+	# 设置Argon主题颜色
+	sed -i "s/option primary '#[0-9a-fA-F]\{6\}'/option primary '#ADD8E6'/" $ARGON_CONFIG_FILE
+	sed -i "s/option dark_primary '#[0-9a-fA-F]\{6\}'/option dark_primary '#c0c0c0'/" $ARGON_CONFIG_FILE
+
+	cd $PKG_PATH && echo "argon theme has been customized!"
 fi

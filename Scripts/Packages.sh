@@ -20,8 +20,47 @@ UPDATE_PACKAGE() {
 	fi
 }
 
+# Git稀疏克隆，只克隆指定目录到本地
+git_sparse_clone() {
+	if [ "$#" -lt 4 ]; then
+		echo "Usage: git_sparse_clone <branch> <repository_url> <repository_dir> <dir1> [<dir2> ...]"
+		return 1
+	fi
+
+	local branch="$1" repourl="$2" repodir="$3"
+	shift 3
+	local target_dirs=("$@")
+
+	git clone --depth=1 -b "$branch" --single-branch --filter=blob:none --sparse "$repourl" "$repodir" || {
+		echo "Error: Failed to clone repository."
+		return 1
+	}
+
+	cd "$repodir" || return 1
+	git sparse-checkout init --cone || {
+		echo "Error: Failed to initialize sparse-checkout."
+		return 1
+	}
+	git sparse-checkout set "${target_dirs[@]}" || {
+		echo "Error: Failed to sparse-checkout specified directories."
+		return 1
+	}
+
+	for dir in "${target_dirs[@]}"; do
+		[ -d "$dir" ] && mv -f "$dir" ../ || echo "Warning: Directory '$dir' does not exist."
+	done
+
+	cd .. || return 1
+	rm -rf "$repodir" || echo "Warning: Failed to remove temporary repository '$repodir'."
+
+	echo "Sparse clone and directory move completed successfully."
+}
+git_sparse_clone main https://github.com/sirpdboy/luci-app-lucky lucky-dir lucky luci-app-lucky
+
 #UPDATE_PACKAGE "包名" "项目地址" "项目分支" "pkg/name，可选，pkg为从大杂烩中单独提取包名插件；name为重命名为包名"
-UPDATE_PACKAGE "argon" "sbwml/luci-theme-argon" "openwrt-24.10"
+UPDATE_PACKAGE "argon" "helmx/luci-theme-argon" "master"
+UPDATE_PACKAGE "design" "helmx/luci-theme-design" "master"
+UPDATE_PACKAGE "advancedplus" "helmx/luci-app-advancedplus" "main"
 
 UPDATE_PACKAGE "homeproxy" "VIKINGYFY/homeproxy" "main"
 UPDATE_PACKAGE "mihomo" "morytyann/OpenWrt-mihomo" "main"
