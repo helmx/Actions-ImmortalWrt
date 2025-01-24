@@ -5,7 +5,7 @@ sed -i "s/luci-theme-bootstrap/luci-theme-$WRT_THEME/g" $(find ./feeds/luci/coll
 #修改immortalwrt.lan关联IP
 sed -i "s/192\.168\.[0-9]*\.[0-9]*/$WRT_IP/g" $(find ./feeds/luci/modules/luci-mod-system/ -type f -name "flash.js")
 #添加编译日期标识
-sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ $WRT_CI-$WRT_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
+sed -i "s/(\(luciversion || ''\))/(\1) + (' \/ $WRT_DATE')/g" $(find ./feeds/luci/modules/luci-mod-status/ -type f -name "10_system.js")
 
 WIFI_SH="./package/base-files/files/etc/uci-defaults/990_set-wireless.sh"
 WIFI_UC="./package/network/config/wifi-scripts/files/lib/wifi/mac80211.uc"
@@ -35,7 +35,6 @@ sed -i "s/hostname='.*'/hostname='$WRT_NAME'/g" $CFG_FILE
 echo "CONFIG_PACKAGE_luci=y" >> ./.config
 echo "CONFIG_LUCI_LANG_zh_Hans=y" >> ./.config
 echo "CONFIG_PACKAGE_luci-theme-$WRT_THEME=y" >> ./.config
-echo "CONFIG_PACKAGE_luci-app-$WRT_THEME-config=y" >> ./.config
 
 #手动调整的插件
 if [ -n "$WRT_PACKAGE" ]; then
@@ -43,7 +42,7 @@ if [ -n "$WRT_PACKAGE" ]; then
 fi
 
 #高通平台调整
-if [[ $WRT_TARGET == *"IPQ"* ]]; then
+if [[ $WRT_TARGET == "qualcommax" ]]; then
 	#取消nss相关feed
 	echo "CONFIG_FEED_nss_packages=n" >> ./.config
 	echo "CONFIG_FEED_sqm_scripts_nss=n" >> ./.config
@@ -53,7 +52,7 @@ if [[ $WRT_TARGET == *"IPQ"* ]]; then
 fi
 
 #编译器优化
-if [[ $WRT_TARGET != *"X86"* ]]; then
+if [[ $WRT_TARGET != *"x86"* ]]; then
 	echo "CONFIG_TARGET_OPTIONS=y" >> ./.config
 	echo "CONFIG_TARGET_OPTIMIZATION=\"-O2 -pipe -march=armv8-a+crypto+crc -mcpu=cortex-a53+crypto+crc -mtune=cortex-a53\"" >> ./.config
 fi
